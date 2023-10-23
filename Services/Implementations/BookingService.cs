@@ -38,7 +38,7 @@ namespace AircraftM.Services.Implementations
             var user = _userRepository.GetById(passenger.UserId);
             var flight = _flightRepository.Get(model.FlightReferenceNumber);
             var aircraft = _aircraftRepository.GetByName(flight.AircraftName);
-            var passengers = _passengerRepository.GetAll();
+            var flights = _flightRepository.GetAll();
 
             //var ps = new List<Passenger>();
             //foreach (var item in passengers)
@@ -59,25 +59,40 @@ namespace AircraftM.Services.Implementations
             //AddToFile(booking);
             //Console.WriteLine($"booking with ref {booking.ReferenceNumber} is successful, your seat number is {booking.SeatNumber}, you are going with aircraft {aircraft.Name}");
             //return booking;
-
-            var ps = passengers.Where(item => item.FlightId == flight.Id).ToList();
-            if (ps.Count < aircraft.Capacity)
+            var check = flights.Any(ft => ft.AircraftName == aircraft.Name);
+            if (check)
             {
-                if (flight.Price <= passenger.Wallet)
+                var flts = flights.Where(flt => flt.AircraftName == aircraft.Name).ToList();
+                if (flts.Count < aircraft.Capacity)
                 {
-                    passenger.Wallet -= flight.Price;
-                    _passengerRepository.UpdateWallet(user.UserEmail, passenger.Wallet);
-                    _userRepository.UpdateWallet(user.UserEmail, passenger.Wallet);
+                    if (flight.Price <= passenger.Wallet)
+                    {
+                        passenger.Wallet -= flight.Price;
+                        _passengerRepository.UpdateWallet(user.UserEmail, passenger.Wallet);
+                        _userRepository.UpdateWallet(user.UserEmail, passenger.Wallet);
+
+                        //string refNum = Guid.NewGuid().ToString().Substring(0, 4) + "FLT" + new Random().Next(0, 99);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Insuficient Balance");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Insuficient Balance");
+                    Console.WriteLine("The Flight is filled up....Unable to book flight");
                 }
             }
             else
             {
-                Console.WriteLine("The Flight is filled up....Unable to book flight");
+                return new BookingResponse<Bookings>
+                {
+                    Data = null,
+                    Message = $"There is a flight scheduled for the aircraft{aircraft.Name} already",
+                     Status = false
+                };
             }
+
         }
     }
 }

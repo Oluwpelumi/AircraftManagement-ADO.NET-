@@ -11,6 +11,7 @@ namespace AircraftM.Services.Interfaces
     public interface IPassengerService
     {
         PassengerResponse<PassengerDto> RegisterPassenger(PassengerRequestModel model);
+        //PassengerResponse<PassengerDto> MakeBooking(PassengerMakeBookingRequestModel model);
         PassengerResponse<PassengerDto> GetPassenger(string regNumber);
         PassengerResponse<List<PassengerDto>> GetAllPassengers();
         PassengerResponse<bool> DeletePassenger(string regNumber);

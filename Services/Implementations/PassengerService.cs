@@ -78,6 +78,7 @@ namespace AircraftM.Services.Implementations
                         UserId = passenger.UserId,
                         RegNumber = passenger.RegNumber,
                         Wallet = passenger.Wallet,
+                        BookingId = passenger.BookingId,
                         DateCreated = passenger.DateCreated
                     }).ToList()
                 };
@@ -116,6 +117,7 @@ namespace AircraftM.Services.Implementations
                         Number = address.Number,
                         UserId = passenger.UserId,
                         RegNumber = passenger.RegNumber,
+                        BookingId = passenger.BookingId,
                         Wallet = passenger.Wallet,
                         DateCreated = passenger.DateCreated
                     },
@@ -169,10 +171,12 @@ namespace AircraftM.Services.Implementations
                 ProfileId = profile.Id,
                 RoleId = _roleRepository.Get("PASSENGER").Id
             };
+
             Passenger passenger = new Passenger
             {
                 UserId = user1.Id,
                 Wallet = model.Wallet,
+
                 RegNumber = profile.LastName + "/" + new Random().Next(100, 999)
             };
             _addressRepository.Create(address);

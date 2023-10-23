@@ -15,37 +15,25 @@ namespace AircraftM.Services.Implementations
     public class FlightService : IFlightService
     {
         IFlightRepository _flightRepository = new FlightRepository();
+        IAircraftRepository _aircraftRepository = new AircraftRepository();
         public FlightResponse<FlightDto> BookFlight(FlightRequestModel model)
         {
-            var flgt = _flightRepository.Get(model.Name);
-            if (flgt != null)
+            var aircrafts = _aircraftRepository.GetAll();
+            bool check = aircrafts.Any(aircraft => aircraft.Name == model.AircraftName);
+            if (check)
             {
-                return new FlightResponse<FlightDto>
+                var flgt = _flightRepository.Get(model.Name);
+                if (flgt != null)
                 {
-                    Status = true,
-                    Message = "flight already exists",
-                    Data = null
-                };
-            }
-            Flight flight = new Flight
-            {
-                Name = model.Name,
-                ReferenceNumber = model.ReferenceNumber,
-                TakeOffPoint = model.TakeOffPoint,
-                Destination = model.Destination,
-                TakeOfTime = model.TakeOfTime,
-                PilotStaffNumber = model.PilotStaffNumber,
-                AircraftName = model.AircraftName,
-                Price = model.Price,
-            };
-            _flightRepository.Book(flight);
-            return new FlightResponse<FlightDto>
-            {
-                Status = true,
-                Message = "flight Registered successfully",
-                Data = new FlightDto
+                    return new FlightResponse<FlightDto>
+                    {
+                        Status = true,
+                        Message = "flight already exists",
+                        Data = null
+                    };
+                }
+                Flight flight = new Flight
                 {
-                    Id = flight.Id,
                     Name = model.Name,
                     ReferenceNumber = model.ReferenceNumber,
                     TakeOffPoint = model.TakeOffPoint,
@@ -54,9 +42,36 @@ namespace AircraftM.Services.Implementations
                     PilotStaffNumber = model.PilotStaffNumber,
                     AircraftName = model.AircraftName,
                     Price = model.Price,
-                    DateCreated = flight.DateCreated
-                }
-            };
+                };
+                _flightRepository.Book(flight);
+                return new FlightResponse<FlightDto>
+                {
+                    Status = true,
+                    Message = "flight Registered successfully",
+                    Data = new FlightDto
+                    {
+                        Id = flight.Id,
+                        Name = model.Name,
+                        ReferenceNumber = model.ReferenceNumber,
+                        TakeOffPoint = model.TakeOffPoint,
+                        Destination = model.Destination,
+                        TakeOfTime = model.TakeOfTime,
+                        PilotStaffNumber = model.PilotStaffNumber,
+                        AircraftName = model.AircraftName,
+                        Price = model.Price,
+                        DateCreated = flight.DateCreated
+                    }
+                };
+            }
+            else
+            {
+                return new FlightResponse<FlightDto>
+                {
+                    Status = true,
+                    Message = $"There is an existing flight for the aircraft{model.AircraftName} already",
+                    Data = null
+                };
+            }
         }
 
         public FlightResponse<bool> DeleteFlight(string referenceNumber)

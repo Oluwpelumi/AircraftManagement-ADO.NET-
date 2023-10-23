@@ -19,7 +19,6 @@ namespace AircraftM.DTOs
         public string PilotStaffNumber { get; init; }
         public string AircraftName { get; init; }
         public double Price { get; init; }
-        public string FlightId { get; init; }
         public DateTime DateCreated { get; init; }
     }
 

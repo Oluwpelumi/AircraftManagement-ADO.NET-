@@ -23,7 +23,7 @@ namespace AircraftM.DTOs
         public string UserId { get; init; }
         public string RegNumber { get; init; }
         public double Wallet { get; set; }
-        public string FlightId { get; set; }
+        public string BookingId { get; set; }
         public DateTime DateCreated { get; init; }
     }
 
@@ -45,6 +45,21 @@ namespace AircraftM.DTOs
         public string PostalCode { get; init; }
         public double Wallet { get; set; }
     }
+
+
+    //public record PassengerMakeBookingRequestModel
+    //{
+    //    public string BookingReferenceNumber { get; init; }
+    //    public int SeatNumber { get; init; }
+    //    public string PassengerEmail { get; init; }
+    //    public string FlightReferenceNumber { get; init; }
+    //    public string TakeOffPoint { get; init; }
+    //    public string Destination { get; init; }
+    //    public DateTime TakeOfTime { get; init; }
+    //    public string PilotStaffNumber { get; init; }
+    //    public string AircraftName { get; init; }
+    //    public double Price { get; init; }
+    //}
 
     public class PassengerResponse<T>
     {
