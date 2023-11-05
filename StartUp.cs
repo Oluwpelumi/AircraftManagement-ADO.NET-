@@ -64,7 +64,8 @@ namespace AircraftM
                 "(Id varchar(50) not null unique," +
                 " Name varchar(50) not null unique, " +
                 "EngineNumber varchar(50) not null unique, " +
-                "Capacity int, DateCreated Datetime, " +
+                "Capacity int, " +
+                "DateCreated Datetime, " +
                 "primary key(Id))";
             CreateTable(querry);
         }
@@ -89,12 +90,30 @@ namespace AircraftM
                 " ReferenceNumber varchar(50) not null unique," +
                 " SeatNumber int, " +
                 "PassengerEmail varchar(50) not null," +
-                "FlightId varchar(50) not null," +
+                "FlightReferenceNumber varchar(50) not null," +
+                " AircraftName varchar(30) not null," +
                 " DateCreated Datetime, " +
                 "primary key(Id), " +
-                "foreign key(FlightId) references Flight(Id))";
+                "foreign key(FlightReferenceNumber) references Flight(ReferenceNumber)," +
+                "foreign key(AircraftName) references Aircraft(Name))";
             CreateTable(querry);
         }
+        //public void CreateBookingTable()
+        //{
+        //    var query = "CREATE TABLE IF NOT EXISTS booking (" +
+        //        "Id VARCHAR(50) NOT NULL UNIQUE, " +
+        //        "ReferenceNumber VARCHAR(50) NOT NULL UNIQUE, " +
+        //        "SeatNumber INT, " +
+        //        "PassengerEmail VARCHAR(50) NOT NULL, " +
+        //        "FlightReferenceNumber VARCHAR(50) NOT NULL, " +
+        //        "AircraftName VARCHAR(30) NOT NULL, " +
+        //        "DateCreated DATETIME, " +
+        //        "PRIMARY KEY (Id), " +
+        //        "FOREIGN KEY (FlightReferenceNumber) REFERENCES Flight (ReferenceNumber), " +
+        //        "FOREIGN KEY (AircraftName) REFERENCES Aircraft (Name))";
+
+        //    CreateTable(query);
+        //}
 
 
         public void CreateAddressTable()
@@ -115,8 +134,7 @@ namespace AircraftM
         {
             var querry = "create table if not exists flight" +
                 "(Id varchar(50) not null unique, " +
-                "Name varchar(50) not null, " +
-                "ReferenceNumber varchar(50) not null," +
+                "ReferenceNumber varchar(50) not null unique," +
                 "TakeOffPoint varchar(50) not null," +
                 " Destination varchar(50) not null ," +
                 "TakeOfTime DateTime, " +
@@ -124,7 +142,8 @@ namespace AircraftM
                 " AircraftName varchar(50) not null, " +
                 "Price double," +
                 "DateCreated Datetime," +
-                " primary key(Id))";
+                " primary key(Id)," +
+                "foreign key(AircraftName) references Aircraft(Name))";
 
             CreateTable(querry);
         }
@@ -150,12 +169,11 @@ namespace AircraftM
                 "(Id varchar(50) not null unique," +
                 "UserId varchar(50) not null," +
                 "RegNumber varchar(50) not null," +
-                "FlightId varchar(50) not null," +
+                "BookingId varchar(50) not null," +
                 "Wallet double ," +
                 " DateCreated Datetime," +
                 " primary key(Id), " +
-                "foreign key(UserId) references User(Id), " +
-                "foreign key(FlightId) references Flight(Id))";
+                "foreign key(UserId) references User(Id))";
             CreateTable(querry);
         }
 
@@ -180,6 +198,7 @@ namespace AircraftM
                 "FirstName varchar(50) not null," +
                 "LastName varchar(50) not null," +
                 "UserName varchar(50) not null," +
+                "UserEmail varchar(50) not null," +
                 "DOB Datetime," +
                 "Gender varchar(50) not null," +
                 " DateCreated Datetime," +

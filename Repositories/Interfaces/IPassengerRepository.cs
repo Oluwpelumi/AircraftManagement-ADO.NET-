@@ -14,6 +14,8 @@ namespace AircraftM.Repositories.Interfaces
         Passenger Get(string regNumber);
         List<Passenger> GetAll();
         bool Delete(string regNumber);
-        bool UpdateWallet(string userEmail, double newWalletAmount);
+        bool UpdateWallet(string regNumber, double newWalletAmount);
+        bool UpdateBookingId(string regNumber, string bookingId);
+        List<Passenger> GetAllPassengersInThisAircraft(string aircraftName);
     }
 }

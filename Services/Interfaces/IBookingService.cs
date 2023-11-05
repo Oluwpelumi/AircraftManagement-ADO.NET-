@@ -10,9 +10,9 @@ namespace AircraftM.Services.Interfaces
 {
     public interface IBookingService
     {
-        BookingResponse<Bookings> MakeBooking(BookingRequestModel model);
-        BookingResponse<Bookings> GetBooking(string id);
-        BookingResponse<List<Bookings>> GetAllBookings();
-        BookingResponse<bool> DeleteBooking(string id);
+        BookingResponse<BookingDto> MakeBooking(BookingRequestModel model);
+        BookingResponse<BookingDto> GetBooking(string referenceNumber);
+        BookingResponse<List<BookingDto>> GetAllBookings();
+        BookingResponse<bool> CancelBooking(string referenceNumber);
     }
 }

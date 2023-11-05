@@ -1,4 +1,5 @@
 ﻿using AircraftM.DTOs;
+using AircraftM.Menu;
 using AircraftM.Models;
 using AircraftM.Repositories.Implementations;
 using AircraftM.Repositories.Interfaces;
@@ -18,6 +19,8 @@ namespace AircraftM.Services.Implementations
         IProfileRepository _profileRepository = new ProfileRepository();
         IAddressRepository _addressRepository = new AddressRepository();
         IRoleRepository _roleRepository = new RoleRepository();
+
+
         public UserResponse<List<UserDto>> GetAllUsers()
         {
             var users = _userRepository.GetAllUsers();
@@ -92,11 +95,12 @@ namespace AircraftM.Services.Implementations
         public UserResponse<UserDto> Login(UserLoginModel model)
         {
             var user = _userRepository.Get(model.UserEmail);
-            if (user != null)
+            if (user != null && user.Password == model.Password)
             {
+                var role = _roleRepository.GetAll().SingleOrDefault(x => x.Id == user.RoleId);
                 return new UserResponse<UserDto>
                 {
-                    Status = false,
+                    Status = true,
                     Message = "Login Successful",
                     Data = new UserDto
                     {
@@ -105,6 +109,7 @@ namespace AircraftM.Services.Implementations
                         ProfileId = user.ProfileId,
                         RoleId = user.RoleId,
                         UserEmail = user.UserEmail,
+                        RoleName = role.Name,
                         DateCreated = user.DateCreated
                     }
                 };
@@ -114,6 +119,27 @@ namespace AircraftM.Services.Implementations
                 Status = false,
                 Message = "Unable to login user",
                 Data = null
+            };
+        }
+
+        UserResponse<bool> IUserService.DeleteUser(string email)
+        {
+            var user = _userRepository.Get(email);
+            if (user != null)
+            {
+                _userRepository.Delete(email);
+                return new UserResponse<bool>
+                {
+                    Data = true,
+                    Message = $"User with the email {user.UserEmail} has been deleted Successfully",
+                    Status = true
+                };
+            }
+            return new UserResponse<bool>
+            {
+                Data = false,
+                Message = "user not found",
+                Status = false
             };
         }
     }

@@ -18,17 +18,22 @@ namespace AircraftM.Services.Implementations
         IProfileRepository _profileRepository = new ProfileRepository();
         IAddressRepository _addressRepository = new AddressRepository();
         IRoleRepository _roleRepository = new RoleRepository();
+        IBookingsRepository _bookingsRepository = new BookingsRepository();
 
         public PassengerResponse<bool> DeletePassenger(string regNumber)
         {
             var passenger = _passengerRepository.Get(regNumber);
             if (passenger != null)
             {
+                var user = _userRepository.GetById(passenger.UserId);
                 _passengerRepository.Delete(regNumber);
+                _userRepository.Delete(user.UserEmail);
+                _profileRepository.Delete(user.UserEmail);
+                _addressRepository.Delete(user.AddressId);
                 return new PassengerResponse<bool>
                 {
                     Data = true,
-                    Message = "Successful",
+                    Message = $"The passenger with the reg-Number {passenger.RegNumber} has been deleted Successfully",
                     Status = true
                 };
             }
@@ -43,11 +48,11 @@ namespace AircraftM.Services.Implementations
         public PassengerResponse<bool> FundWallet(string staffNumber, double amount)
         {
             var passenger = _passengerRepository.Get(staffNumber);
-            var user = _userRepository.GetById(passenger.UserId);
             if (passenger != null)
             {
-                _passengerRepository.UpdateWallet(user.UserEmail, amount);
-                _userRepository.UpdateWallet(user.UserEmail, amount);
+                var user = _userRepository.GetById(passenger.UserId);
+                _passengerRepository.UpdateWallet(staffNumber, amount);
+                //_userRepository.UpdateWallet(user.UserEmail, amount);
                 return new PassengerResponse<bool>
                 {
                     Message = "Wallet Updated Successfully",
@@ -59,6 +64,35 @@ namespace AircraftM.Services.Implementations
             {
                 Message = "Unable to fund wallet",
                 Data = false,
+                Status = false
+            };
+        }
+
+        public PassengerResponse<List<PassengerDto>> GetAllPaseengerSchedledForAParticularFlight(PassengerBookingIdRequestModel model)
+        {
+            var aircraftName = _bookingsRepository.Get(model.BookingId).AircraftName;
+            var passengers = _passengerRepository.GetAllPassengersInThisAircraft(aircraftName);
+            if (passengers != null)
+            {
+                return new PassengerResponse<List<PassengerDto>>
+                {
+                    Status = true,
+                    Message = "Successful",
+                    Data = passengers.Select(passenger => new PassengerDto
+                    {
+                        Id = passenger.Id,
+                        UserId = passenger.UserId,
+                        RegNumber = passenger.RegNumber,
+                        Wallet = passenger.Wallet,
+                        BookingId = passenger.BookingId,
+                        DateCreated = passenger.DateCreated
+                    }).ToList()
+                };
+            }
+            return new PassengerResponse<List<PassengerDto>>
+            {
+                Data = null,
+                Message = "No passenger found",
                 Status = false
             };
         }
@@ -98,7 +132,7 @@ namespace AircraftM.Services.Implementations
             {
                 var user = _userRepository.GetById(passenger.UserId);
                 var address = _addressRepository.Get(user.AddressId);
-                var profile = _profileRepository.Get(user.ProfileId);
+                var profile = _profileRepository.Get(user.UserEmail);
                 return new PassengerResponse<PassengerDto>
                 {
                     Data = new PassengerDto
@@ -132,6 +166,8 @@ namespace AircraftM.Services.Implementations
                 Status = false
             };
         }
+
+
 
         public PassengerResponse<PassengerDto> RegisterPassenger(PassengerRequestModel model)
         {
@@ -169,14 +205,14 @@ namespace AircraftM.Services.Implementations
                 Password = model.Password,
                 AddressId = address.Id,
                 ProfileId = profile.Id,
-                RoleId = _roleRepository.Get("PASSENGER").Id
+                RoleId = _roleRepository.Get("passenger").Id
             };
 
             Passenger passenger = new Passenger
             {
                 UserId = user1.Id,
                 Wallet = model.Wallet,
-
+                BookingId = "0",
                 RegNumber = profile.LastName + "/" + new Random().Next(100, 999)
             };
             _addressRepository.Create(address);

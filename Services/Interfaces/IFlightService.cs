@@ -10,7 +10,7 @@ namespace AircraftM.Services.Interfaces
 {
     public interface IFlightService
     {
-        FlightResponse<FlightDto> BookFlight(FlightRequestModel model);
+        FlightResponse<FlightDto> ScheduleFlight(FlightRequestModel model);
         FlightResponse<FlightDto> GetFlight(string referenceNumber);
         FlightResponse<List<FlightDto>> GetAllFlights();
         FlightResponse<bool> DeleteFlight(string referenceNumber);

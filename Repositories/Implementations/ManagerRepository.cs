@@ -11,10 +11,13 @@ namespace AircraftM.Repositories.Implementations
 {
     public class ManagerRepository : IManagerRepository
     {
-        StartUp db = new();
+        public string connectionStrings = "server = localhost; user = root; database = AircraftMgt; password = Adewale24434$";
+        public MySqlConnection Connection() => new MySqlConnection(connectionStrings);
+
+
         public bool Delete(string staffNumber)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var querry = $"DELETE FROM manager WHERE StaffNumber = @staffNumber;";
@@ -31,7 +34,7 @@ namespace AircraftM.Repositories.Implementations
 
         public Manager Get(string staffNumber)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from manager where StaffNumber = @staffNumber;", connect);
@@ -53,15 +56,16 @@ namespace AircraftM.Repositories.Implementations
 
         public Manager GetById(string userId)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from manager where UserId = @userId;", connect);
                 command.Parameters.AddWithValue("@userId", userId);
                 var row = command.ExecuteReader();
-                Manager manager = new();
+                Manager manager = null;
                 while (row.Read())
                 {
+                    manager = new Manager();
                     manager.Id = Convert.ToString(row[0]);
                     manager.UserId = Convert.ToString(row[1]);
                     manager.StaffNumber = Convert.ToString(row[2]);
@@ -75,7 +79,7 @@ namespace AircraftM.Repositories.Implementations
         public List<Manager> GetAll()
         {
             List<Manager> managers = new List<Manager>();
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"Select * From manager;", connect);
@@ -97,10 +101,11 @@ namespace AircraftM.Repositories.Implementations
         }
         public Manager Register(Manager manager)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
-                var querry = $"Insert into manager (Id, UserId, StaffNumber, Wallet, DateCreated) values('{manager.Id}', '{manager.UserId}', '{manager.StaffNumber}', '{manager.Wallet}', '{manager.DateCreated}');";
+                var dateCreated = manager.DateCreated.ToString("yyyy-MM-dd HH:mm:ss");
+                var querry = $"Insert into manager (Id, UserId, StaffNumber, Wallet, DateCreated) values('{manager.Id}', '{manager.UserId}', '{manager.StaffNumber}', '{manager.Wallet}', '{dateCreated}');";
                 var command = new MySqlCommand(querry, connect);
                 var row = command.ExecuteNonQuery();
                 if (row != -1)
@@ -114,7 +119,7 @@ namespace AircraftM.Repositories.Implementations
 
         public bool UpdateWallet(string userEmail, double newWalletAmount)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
 

@@ -22,15 +22,17 @@ namespace AircraftM.Services.Implementations
         public PilotResponse<bool> DeletePilot(string staffNumber)
         {
             var pilot = _pilotRepository.Get(staffNumber);
-            var user = _userRepository.GetById(pilot.UserId);
             if (pilot != null)
             {
+                var user = _userRepository.GetById(pilot.UserId);
                 _pilotRepository.Delete(staffNumber);
                 _userRepository.Delete(user.UserEmail);
+                _profileRepository.Delete(user.UserEmail);
+                _addressRepository.Delete(user.AddressId);
                 return new PilotResponse<bool>
                 {
                     Data = true,
-                    Message = "Successful",
+                    Message = $"The pilot with the staff-Number {pilot.StaffNumber} has been deleted Successfully",
                     Status = true
                 };
             }
@@ -99,7 +101,7 @@ namespace AircraftM.Services.Implementations
             {
                 var user = _userRepository.GetById(pilot.UserId);
                 var address = _addressRepository.Get(user.AddressId);
-                var profile = _profileRepository.Get(user.ProfileId);
+                var profile = _profileRepository.Get(user.UserEmail);
                 return new PilotResponse<PilotDto>
                 {
                     Data = new PilotDto
@@ -168,7 +170,7 @@ namespace AircraftM.Services.Implementations
                 Password = model.Password,
                 AddressId = address.Id,
                 ProfileId = profile.Id,
-                RoleId = _roleRepository.Get("PILOT").Id
+                RoleId = _roleRepository.Get("pilot").Id
             };
             Pilot pilot = new Pilot
             {

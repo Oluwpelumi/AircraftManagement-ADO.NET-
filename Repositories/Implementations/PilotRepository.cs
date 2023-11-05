@@ -1,4 +1,5 @@
-﻿using AircraftM.Models;
+﻿
+using AircraftM.Models;
 using AircraftM.Repositories.Interfaces;
 using MySql.Data.MySqlClient;
 using System;
@@ -11,10 +12,14 @@ namespace AircraftM.Repositories.Implementations
 {
     public class PilotRepository : IPilotRepository
     {
-        StartUp db = new StartUp();
+        public string connectionStrings = "server = localhost; user = root; database = AircraftMgt; password = Adewale24434$";
+        public MySqlConnection Connection() => new MySqlConnection(connectionStrings);
+
+
+
         public bool Delete(string staffNumber)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var querry = $"DELETE FROM pilot WHERE StaffNumber = @staffNumber;";
@@ -31,15 +36,16 @@ namespace AircraftM.Repositories.Implementations
 
         public Pilot Get(string staffNumber)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from pilot where StaffNumber = @staffNumber;", connect);
                 command.Parameters.AddWithValue("@staffNumber", staffNumber);
                 var row = command.ExecuteReader();
-                Pilot pilot = new();
+                Pilot pilot = null;
                 while (row.Read())
                 {
+                    pilot = new Pilot();
                     pilot.Id = Convert.ToString(row[0]);
                     pilot.UserId = Convert.ToString(row[1]);
                     pilot.StaffNumber = Convert.ToString(row[2]);
@@ -50,7 +56,7 @@ namespace AircraftM.Repositories.Implementations
             }
         }public Pilot GetById(string id)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from pilot where Id = @id;", connect);
@@ -72,7 +78,7 @@ namespace AircraftM.Repositories.Implementations
         public List<Pilot> GetAll()
         {
             List<Pilot> pilots = new List<Pilot>();
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"Select * From pilot;", connect);
@@ -95,10 +101,11 @@ namespace AircraftM.Repositories.Implementations
 
         public Pilot Register(Pilot pilot)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
-                var querry = $"Insert into pilot (Id, UserId, StaffNumber, Wallet, DateCreated) values('{pilot.Id}', '{pilot.UserId}', '{pilot.StaffNumber}', '{pilot.Wallet}', '{pilot.DateCreated}');";
+                var dateCreated = pilot.DateCreated.ToString("yyyy-MM-dd HH:mm:ss");
+                var querry = $"Insert into pilot (Id, UserId, StaffNumber, Wallet, DateCreated) values('{pilot.Id}', '{pilot.UserId}', '{pilot.StaffNumber}', '{pilot.Wallet}', '{dateCreated}');";
                 var command = new MySqlCommand(querry, connect);
                 var row = command.ExecuteNonQuery();
                 if (row != -1)
@@ -111,7 +118,7 @@ namespace AircraftM.Repositories.Implementations
 
         public bool UpdateWallet(string userEmail, double newWalletAmount)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
 

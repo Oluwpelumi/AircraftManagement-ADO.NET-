@@ -6,6 +6,7 @@ using AircraftM.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,80 +17,170 @@ namespace AircraftM.Services.Implementations
         IPassengerRepository _passengerRepository = new PassengerRepository();
         IUserRepository _userRepository = new UserRepository();
         IAircraftRepository _aircraftRepository = new AircraftRepository();
-        IFlightRepository _flightRepository = new FlightRepository();    
-        public BookingResponse<bool> DeleteBooking(string id)
+        IFlightRepository _flightRepository = new FlightRepository();   
+        IBookingsRepository _bookingsRepository = new BookingsRepository(); 
+
+
+        public BookingResponse<bool> CancelBooking(string referenceNumber)
         {
-            throw new NotImplementedException();
+            var bk = _bookingsRepository.Get(referenceNumber);
+            if (bk != null)
+            {
+                _bookingsRepository.Delete(bk.Id);
+                return new BookingResponse<bool>
+                {
+                    Data = true,
+                    Message = $"Bookig with the Id{bk.Id} has been cancelled successfully.",
+                    Status = true
+                };
+            }
+            return new BookingResponse<bool>
+            {
+                Data = false,
+                Message = $"Bookig with the Id{bk.Id} does not exist.",
+                Status = false
+            };
         }
 
-        public BookingResponse<List<Bookings>> GetAllBookings()
+        public BookingResponse<List<BookingDto>> GetAllBookings()
         {
-            throw new NotImplementedException();
+            var bookings = _bookingsRepository.GetAll();
+            if (bookings != null)
+            {
+                return new BookingResponse<List<BookingDto>>
+                {
+                    Data = bookings.Select(booking => new BookingDto
+                    {
+                        Id = booking.Id,
+                        ReferenceNumber = booking.ReferenceNumber,
+                        FlightReferenceNumber = booking.FlightReferenceNumber,
+                        PassengerEmail = booking.PassengerEmail,
+                        SeatNumber = booking.SeatNumber,
+                        AircraftName = booking.AircraftName,
+                        DateCreated =booking.DateCreated
+                    }).ToList(),
+                    Message = "Successful",
+                    Status = true
+                };
+            }
+            return new BookingResponse<List<BookingDto>>
+            {
+                Data = null,
+                Message = "No bookings yet",
+                Status = false
+            };
         }
 
-        public BookingResponse<Bookings> GetBooking(string id)
+        public BookingResponse<BookingDto> GetBooking(string referenceNumber)
         {
-            throw new NotImplementedException();
+            var book = _bookingsRepository.Get(referenceNumber);
+            if (book != null)
+            {
+                return new BookingResponse<BookingDto>
+                {
+                    Data = new BookingDto
+                    {
+                        Id = book.Id,
+                        ReferenceNumber = book.ReferenceNumber,
+                        SeatNumber = book.SeatNumber,
+                        PassengerEmail = book.PassengerEmail,
+                        FlightReferenceNumber = book.FlightReferenceNumber,
+                        AircraftName = book.AircraftName,
+                        DateCreated = book.DateCreated
+                    },
+                    Message = "Successful",
+                    Status = true
+                };
+            }
+            return new BookingResponse<BookingDto>
+            {
+                Data = null,
+                Message = "No booking Found",
+                Status = false
+            };
         }
 
-        public BookingResponse<Bookings> MakeBooking(BookingRequestModel model)
+        public BookingResponse<BookingDto> MakeBooking(BookingRequestModel model)
         {
-            var passenger = _passengerRepository.Get(model.PassengerEmail);
-            var user = _userRepository.GetById(passenger.UserId);
+            var user = _userRepository.Get(model.PassengerEmail);
+            var passenger = _passengerRepository.GetAll().SingleOrDefault(a => a.UserId == user.Id);
             var flight = _flightRepository.Get(model.FlightReferenceNumber);
             var aircraft = _aircraftRepository.GetByName(flight.AircraftName);
-            var flights = _flightRepository.GetAll();
-
-            //var ps = new List<Passenger>();
-            //foreach (var item in passengers)
-            //{
-            //    if (item.FlightId == flight.Id)
-            //    {
-            //        ps.Add(item);
-            //    }
-            //}
-
-            //passenger.Wallet -= flight.Price;
-            //passengerInterface.Update(passenger.UserEmail);
-            //userInterface.Update(passengerEmail);
-            //flight.Passengers.Add(passengerEmail);
-            //string refNum = flight.Passengers.Count + "AirLine" + new Random().Next(1, 99);
-            //var booking = new Booking(bookingDb.Count + 1, refNum, flight.Passengers.Count, passengerEmail, flightReferenceNumber);
-            //bookingDb.Add(booking);
-            //AddToFile(booking);
-            //Console.WriteLine($"booking with ref {booking.ReferenceNumber} is successful, your seat number is {booking.SeatNumber}, you are going with aircraft {aircraft.Name}");
-            //return booking;
-            var check = flights.Any(ft => ft.AircraftName == aircraft.Name);
-            if (check)
+            //var flights = _flightRepository.GetAll();
+            var bookings = _bookingsRepository.GetAll().Where(bk => bk.AircraftName == aircraft.Name).ToList();
+            if (user != null)
             {
-                var flts = flights.Where(flt => flt.AircraftName == aircraft.Name).ToList();
-                if (flts.Count < aircraft.Capacity)
+                if (flight != null)
                 {
-                    if (flight.Price <= passenger.Wallet)
+                    if (flight.Price <= passenger.Wallet && bookings.Count < aircraft.Capacity)
                     {
                         passenger.Wallet -= flight.Price;
-                        _passengerRepository.UpdateWallet(user.UserEmail, passenger.Wallet);
-                        _userRepository.UpdateWallet(user.UserEmail, passenger.Wallet);
-
-                        //string refNum = Guid.NewGuid().ToString().Substring(0, 4) + "FLT" + new Random().Next(0, 99);
+                        _passengerRepository.UpdateWallet(passenger.RegNumber, passenger.Wallet);
+                        Bookings bk = new Bookings
+                        {
+                            AircraftName = aircraft.Name,
+                            FlightReferenceNumber = model.FlightReferenceNumber,
+                            PassengerEmail = model.PassengerEmail,
+                            SeatNumber = bookings.Count + 1,
+                            ReferenceNumber = "BLK" + "/" + new Random().Next(1,99) + "/" + bookings.Count+1
+                        };
+                        _bookingsRepository.Make(bk);
+                        _passengerRepository.UpdateBookingId(passenger.RegNumber, bk.Id);
+                        return new BookingResponse<BookingDto>
+                        {
+                            Data = new BookingDto
+                            {
+                                AircraftName = bk.AircraftName,
+                                Destination = flight.Destination,
+                                FlightReferenceNumber = bk.FlightReferenceNumber,
+                                PassengerEmail = bk.PassengerEmail,
+                                PilotStaffNumber = flight.PilotStaffNumber,
+                                Price = flight.Price,
+                                ReferenceNumber = bk.ReferenceNumber,
+                                SeatNumber = bk.SeatNumber,
+                                TakeOffPoint = flight.TakeOffPoint,
+                                TakeOfTime = flight.TakeOfTime
+                            },
+                            Message = "Booking successful",
+                            Status = true
+                        };
                     }
                     else
                     {
-                        Console.WriteLine("Insuficient Balance");
+                        string message = "";
+                        if (flight.Price > passenger.Wallet)
+                        {
+                            message = "Insufficient Balance";
+                        }
+                        else if (bookings.Count >= aircraft.Capacity)
+                        {
+                            message = $"The aircraft{aircraft.Name} is filled up already .......  Unable to book flight";
+                        }
+                        return new BookingResponse<BookingDto>
+                        {
+                            Data = null,
+                            Status = false,
+                            Message = message
+                        };
                     }
                 }
                 else
                 {
-                    Console.WriteLine("The Flight is filled up....Unable to book flight");
+                    return new BookingResponse<BookingDto>
+                    {
+                        Data = null,
+                        Status = false,
+                        Message = $"No flight with the reference-number {model.FlightReferenceNumber}"
+                    };
                 }
             }
             else
             {
-                return new BookingResponse<Bookings>
+                return new BookingResponse<BookingDto>
                 {
                     Data = null,
-                    Message = $"There is a flight scheduled for the aircraft{aircraft.Name} already",
-                     Status = false
+                    Status = false,
+                    Message = "Invalid Email Address"
                 };
             }
 

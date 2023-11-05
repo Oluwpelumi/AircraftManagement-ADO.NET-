@@ -12,6 +12,7 @@ namespace AircraftM.Services.Interfaces
     {
         AircraftResponse<AircraftDto> RegisterAircraft(AircraftRequestModel model);
         AircraftResponse<AircraftDto> GetAircraft(string engineNumber);
+        AircraftResponse<AircraftDto> GetAircraftByName(string name);
         AircraftResponse<List<AircraftDto>> GetAllAircrafts();
         AircraftResponse<bool> DeleteAircraft(string engineNumber);
     }

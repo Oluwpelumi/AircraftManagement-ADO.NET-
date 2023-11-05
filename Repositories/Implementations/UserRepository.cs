@@ -1,4 +1,5 @@
-﻿using AircraftM.Models;
+﻿using AircraftM.Menu;
+using AircraftM.Models;
 using AircraftM.Repositories.Interfaces;
 using MySql.Data.MySqlClient;
 using System;
@@ -11,15 +12,17 @@ namespace AircraftM.Repositories.Implementations
 {
     public class UserRepository : IUserRepository
     {
-        StartUp db = new StartUp();
-        
+        public string connectionStrings = "server = localhost; user = root; database = AircraftMgt; password = Adewale24434$";
+        public MySqlConnection Connection() => new MySqlConnection(connectionStrings);
+
 
         public User Create(User user)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
-                var querry = $"Insert into user (Id, UserEmail, Password, AddressId, ProfileId, RoleId, DateCreated) values('{user.Id}', '{user.UserEmail}', '{user.Password}', '{user.AddressId}', '{user.ProfileId}', '{user.RoleId}','{user.DateCreated}');";
+                var dateCreated = user.DateCreated.ToString("yyyy-MM-dd HH:mm:ss");
+                var querry = $"Insert into user (Id, UserEmail, Password, AddressId, ProfileId, RoleId, DateCreated) values('{user.Id}', '{user.UserEmail}', '{user.Password}', '{user.AddressId}', '{user.ProfileId}', '{user.RoleId}','{dateCreated}');";
                 var command = new MySqlCommand(querry, connect);
                 var row = command.ExecuteNonQuery();
                 if (row != -1)
@@ -32,7 +35,7 @@ namespace AircraftM.Repositories.Implementations
 
         public bool Delete(string userEmail)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var querry = $"DELETE FROM user WHERE UserEmail = @userEmail;";
@@ -49,7 +52,7 @@ namespace AircraftM.Repositories.Implementations
 
         public bool UpdateWallet(string userEmail, double newWalletAmount)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
 
@@ -71,15 +74,16 @@ namespace AircraftM.Repositories.Implementations
 
         public User Get(string userEmail)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from user where UserEmail = @userEmail;", connect);
                 command.Parameters.AddWithValue("@userEmail", userEmail);
                 var row = command.ExecuteReader();
-                User user = new();
+                User user = null;
                 while (row.Read())
                 {
+                    user = new User();
                     user.Id = Convert.ToString(row[0]);
                     user.UserEmail = Convert.ToString(row[1]);
                     user.Password = Convert.ToString(row[2]);
@@ -95,7 +99,7 @@ namespace AircraftM.Repositories.Implementations
 
         public User GetById(string id)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from user where Id = @id;", connect);
@@ -119,7 +123,7 @@ namespace AircraftM.Repositories.Implementations
         public List<User> GetAllUsers()
         {
             List<User> useres = new List<User>();
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"Select * From user;", connect);

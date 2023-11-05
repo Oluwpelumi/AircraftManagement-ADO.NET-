@@ -15,5 +15,5 @@ namespace AircraftM.Services.Interfaces
         PilotResponse<List<PilotDto>> GetAllPilots();
         PilotResponse<bool> DeletePilot(string staffNumber);
         PilotResponse<bool> FundWallet(string staffNumber, double amount);
-    
+    }
 }

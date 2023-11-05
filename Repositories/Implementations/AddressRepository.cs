@@ -1,4 +1,5 @@
-﻿using AircraftM.Models;
+﻿using AircraftM.Menu;
+using AircraftM.Models;
 using AircraftM.Repositories.Interfaces;
 using MySql.Data.MySqlClient;
 using System;
@@ -11,13 +12,17 @@ namespace AircraftM.Repositories.Implementations
 {
     public class AddressRepository : IAddressRepository
     {
-        public StartUp db = new StartUp();
+        public string connectionStrings = "server = localhost; user = root; database = AircraftMgt; password = Adewale24434$";
+        public MySqlConnection Connection() => new MySqlConnection(connectionStrings);
+
+
         public Address Create(Address address)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
-                var querry = $"Insert into address (Id, Number, Street, City, State, PostalCode, DateCreated) values('{address.Id}', '{address.Number}', '{address.Street}', '{address.City}', '{address.State}', '{address.PostalCode}','{address.DateCreated}');";
+                var dateCreated = address.DateCreated.ToString("yyyy-MM-dd HH:mm:ss");
+                var querry = $"Insert into address (Id, Number, Street, City, State, PostalCode, DateCreated) values('{address.Id}', '{address.Number}', '{address.Street}', '{address.City}', '{address.State}', '{address.PostalCode}','{dateCreated}');";
                 var command = new MySqlCommand(querry, connect);
                 var row = command.ExecuteNonQuery();
                 if (row != -1)
@@ -30,7 +35,7 @@ namespace AircraftM.Repositories.Implementations
 
         public bool Delete(string id)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var querry = $"DELETE FROM address WHERE ID = @id;";
@@ -47,15 +52,16 @@ namespace AircraftM.Repositories.Implementations
 
         public Address Get(string id)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from address where Id = @id;", connect);
                 command.Parameters.AddWithValue("@id", id);
                 var row = command.ExecuteReader();
-                Address address = new();
+                Address address = null;
                 while (row.Read())
                 {
+                    address = new Address();
                     address.Id = Convert.ToString(row[0]);
                     address.Number = Convert.ToInt32(row[1]);
                     address.Street = Convert.ToString(row[2]);
@@ -71,7 +77,7 @@ namespace AircraftM.Repositories.Implementations
         public List<Address> GetAll()
         {
             List<Address> addresses = new List<Address>();
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"Select * From address;", connect);

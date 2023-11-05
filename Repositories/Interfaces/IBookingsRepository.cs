@@ -10,7 +10,7 @@ namespace AircraftM.Repositories.Interfaces
     public interface IBookingsRepository
     {
         Bookings Make(Bookings bk);
-        Bookings Get(string id);
+        Bookings Get(string referenceNumber);
         List<Bookings> GetAll();
         bool Delete(string id);
     }

@@ -8,7 +8,6 @@ namespace AircraftM.Models
 {
     public class Flight : AuditableEntities
     {
-        public string Name{ get; set; }
         public string ReferenceNumber{ get; set; }
         public string TakeOffPoint{ get; set; }
         public string Destination{ get; set; }

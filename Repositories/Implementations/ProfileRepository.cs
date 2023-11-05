@@ -1,4 +1,5 @@
-﻿using AircraftM.Models;
+﻿using AircraftM.Menu;
+using AircraftM.Models;
 using AircraftM.Repositories.Interfaces;
 using MySql.Data.MySqlClient;
 using System;
@@ -12,14 +13,19 @@ namespace AircraftM.Repositories.Implementations
 {
     public class ProfileRepository : IProfileRepository
     {
-        StartUp db = new();
-       
+        public string connectionStrings = "server = localhost; user = root; database = AircraftMgt; password = Adewale24434$";
+        public MySqlConnection Connection() => new MySqlConnection(connectionStrings);
+
+
+
         public Profile Create(Profile profile)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
-                var querry = $"Insert into profile (Id, FirstName, LastName, UserName, UserEmail, DOB, Gender, DateCreated) values('{profile.Id}', '{profile.FirstName}', '{profile.LastName}', '{profile.UserName}', '{profile.UserEmail}', '{profile.DOB}', '{profile.Gender}','{profile.DateCreated}');";
+                var dateCreated = profile.DateCreated.ToString("yyyy-MM-dd HH:mm:ss");
+                var dob = profile.DOB.ToString("yyyy-MM-dd HH:mm:ss");
+                var querry = $"Insert into profile (Id, FirstName, LastName, UserName, UserEmail, DOB, Gender, DateCreated) values('{profile.Id}', '{profile.FirstName}', '{profile.LastName}', '{profile.UserName}', '{profile.UserEmail}', '{dob}', '{profile.Gender}','{dateCreated}');";
                 var command = new MySqlCommand(querry, connect);
                 var row = command.ExecuteNonQuery();
                 if (row != -1)
@@ -32,7 +38,7 @@ namespace AircraftM.Repositories.Implementations
 
         public bool Delete(string userEmail)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var querry = $"DELETE FROM profile WHERE UserEmail = @userEmail;";
@@ -49,15 +55,16 @@ namespace AircraftM.Repositories.Implementations
 
         public Profile Get(string userEmail)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from profile where UserEmail = @userEmail;", connect);
                 command.Parameters.AddWithValue("@userEmail", userEmail);
                 var row = command.ExecuteReader();
-                Profile profile = new();
+                Profile profile = null;
                 while (row.Read())
                 {
+                    profile = new Profile();
                     profile.Id = Convert.ToString(row[0]);
                     profile.FirstName = Convert.ToString(row[1]);
                     profile.LastName = Convert.ToString(row[2]);
@@ -74,7 +81,7 @@ namespace AircraftM.Repositories.Implementations
         public List<Profile> GetAll()
         {
             List<Profile> profiles = new List<Profile>();
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"Select * From profile;", connect);

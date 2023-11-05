@@ -118,5 +118,32 @@ namespace AircraftM.Services.Implementations
                 Status = false
             };
         }
+
+
+        public RoleResponse<RoleDto> GetRoleById(string id)
+        {
+            var role = _roleRepository.GetById(id);
+            if (role != null)
+            {
+                return new RoleResponse<RoleDto>
+                {
+                    Data = new RoleDto
+                    {
+                        Id = role.Id,
+                        Name = role.Name,
+                        Description = role.Description,
+                        DateCreated = role.DateCreated
+                    },
+                    Message = "Successful",
+                    Status = true
+                };
+            }
+            return new RoleResponse<RoleDto>
+            {
+                Data = null,
+                Message = "role not found",
+                Status = false
+            };
+        }
     }
 }

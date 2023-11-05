@@ -13,5 +13,6 @@ namespace AircraftM.Models
         public int SeatNumber{ get; set; }
         public string PassengerEmail{ get; set; }
         public string FlightReferenceNumber{ get; set; }
+        public string AircraftName{ get; set; }
     }
 }

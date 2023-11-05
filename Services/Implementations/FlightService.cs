@@ -16,13 +16,13 @@ namespace AircraftM.Services.Implementations
     {
         IFlightRepository _flightRepository = new FlightRepository();
         IAircraftRepository _aircraftRepository = new AircraftRepository();
-        public FlightResponse<FlightDto> BookFlight(FlightRequestModel model)
+        public FlightResponse<FlightDto> ScheduleFlight(FlightRequestModel model)
         {
             var aircrafts = _aircraftRepository.GetAll();
             bool check = aircrafts.Any(aircraft => aircraft.Name == model.AircraftName);
             if (check)
             {
-                var flgt = _flightRepository.Get(model.Name);
+                var flgt = _flightRepository.Get(model.ReferenceNumber);
                 if (flgt != null)
                 {
                     return new FlightResponse<FlightDto>
@@ -34,7 +34,6 @@ namespace AircraftM.Services.Implementations
                 }
                 Flight flight = new Flight
                 {
-                    Name = model.Name,
                     ReferenceNumber = model.ReferenceNumber,
                     TakeOffPoint = model.TakeOffPoint,
                     Destination = model.Destination,
@@ -47,11 +46,10 @@ namespace AircraftM.Services.Implementations
                 return new FlightResponse<FlightDto>
                 {
                     Status = true,
-                    Message = "flight Registered successfully",
+                    Message = $"flight with the reference-number {model.ReferenceNumber} has been Registered successfully",
                     Data = new FlightDto
                     {
                         Id = flight.Id,
-                        Name = model.Name,
                         ReferenceNumber = model.ReferenceNumber,
                         TakeOffPoint = model.TakeOffPoint,
                         Destination = model.Destination,
@@ -68,7 +66,7 @@ namespace AircraftM.Services.Implementations
                 return new FlightResponse<FlightDto>
                 {
                     Status = true,
-                    Message = $"There is an existing flight for the aircraft{model.AircraftName} already",
+                    Message = $"There is an existing flight schedule for the aircraft{model.AircraftName} already",
                     Data = null
                 };
             }
@@ -83,7 +81,7 @@ namespace AircraftM.Services.Implementations
                 return new FlightResponse<bool>
                 {
                     Data = true,
-                    Message = "Successful",
+                    Message = $"The flight with the reference number {flight.ReferenceNumber} has been cancelled Successfully",
                     Status = true
                 };
             }
@@ -107,7 +105,6 @@ namespace AircraftM.Services.Implementations
                     Data = flights.Select(flight => new FlightDto
                     {
                         Id = flight.Id,
-                        Name = flight.Name,
                         ReferenceNumber = flight.ReferenceNumber,
                         TakeOffPoint = flight.TakeOffPoint,
                         Destination = flight.Destination,
@@ -137,7 +134,6 @@ namespace AircraftM.Services.Implementations
                     Data = new FlightDto
                     {
                         Id = flight.Id,
-                        Name = flight.Name,
                         ReferenceNumber = flight.ReferenceNumber,
                         TakeOffPoint = flight.TakeOffPoint,
                         Destination = flight.Destination,

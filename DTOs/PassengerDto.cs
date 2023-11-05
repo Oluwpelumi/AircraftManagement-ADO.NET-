@@ -28,6 +28,11 @@ namespace AircraftM.DTOs
     }
 
 
+    public record PassengerBookingIdRequestModel
+    {
+        public string BookingId { get; set; }
+    }
+
     public record PassengerRequestModel
     {
         public string FirstName { get; init; }

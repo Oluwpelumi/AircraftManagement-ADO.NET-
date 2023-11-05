@@ -13,5 +13,6 @@ namespace AircraftM.Services.Interfaces
         UserResponse<UserDto> Login(UserLoginModel model);
         UserResponse<UserDto> GetUser(string userEmail);
         UserResponse<List<UserDto>> GetAllUsers();
+        UserResponse<bool> DeleteUser(string email);
     }
 }

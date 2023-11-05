@@ -12,6 +12,7 @@ namespace AircraftM.Services.Interfaces
     {
         RoleResponse<RoleDto> AddRole(RoleRequestModel model);
         RoleResponse<RoleDto> GetRole(string name);
+        RoleResponse<RoleDto> GetRoleById(string id);
         RoleResponse<List<RoleDto>> GetAllRoles();
         RoleResponse<bool> DeleteRole(string name);
     }

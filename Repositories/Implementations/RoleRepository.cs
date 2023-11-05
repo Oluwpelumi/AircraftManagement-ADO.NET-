@@ -1,4 +1,5 @@
-﻿using AircraftM.Models;
+﻿using AircraftM.Menu;
+using AircraftM.Models;
 using AircraftM.Repositories.Interfaces;
 using MySql.Data.MySqlClient;
 using System;
@@ -12,10 +13,13 @@ namespace AircraftM.Repositories.Implementations
 {
     public class RoleRepository : IRoleRepository
     {
-        StartUp db = new();
+        public string connectionStrings = "server = localhost; user = root; database = AircraftMgt; password = Adewale24434$";
+        public MySqlConnection Connection() => new MySqlConnection(connectionStrings);
+
+
         public bool Delete(string name)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var querry = $"DELETE FROM role WHERE Name = @name;";
@@ -32,15 +36,16 @@ namespace AircraftM.Repositories.Implementations
 
         public Role Get(string name)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from role where Name = @name;", connect);
                 command.Parameters.AddWithValue("@name", name);
                 var row = command.ExecuteReader();
-                Role role = new();
+                Role role = null;
                 while (row.Read())
                 {
+                    role = new Role();
                     role.Id = Convert.ToString(row[0]);
                     role.Name = Convert.ToString(row[1]);
                     role.Description = Convert.ToString(row[2]);
@@ -53,7 +58,7 @@ namespace AircraftM.Repositories.Implementations
         public List<Role> GetAll()
         {
             List<Role> roles = new List<Role>();
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"Select * From role;", connect);
@@ -75,7 +80,7 @@ namespace AircraftM.Repositories.Implementations
 
         public Role GetById(string id)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from role where Id = @id;", connect);
@@ -95,10 +100,11 @@ namespace AircraftM.Repositories.Implementations
 
         public Role Register(Role role)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
-                var querry = $"Insert into role (Id, Name, Description, DateCreated) values('{role.Id}', '{role.Name}', '{role.Description}', '{role.DateCreated}');";
+                var dateCreated = role.DateCreated.ToString("yyyy-MM-dd HH:mm:ss");
+                var querry = $"Insert into role (Id, Name, Description, DateCreated) values('{role.Id}', '{role.Name}', '{role.Description}', '{dateCreated}');";
                 var command = new MySqlCommand(querry, connect);
                 var row = command.ExecuteNonQuery();
                 if (row != -1)

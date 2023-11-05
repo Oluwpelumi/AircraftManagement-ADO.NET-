@@ -9,15 +9,19 @@ using System.Threading.Tasks;
 
 namespace AircraftM.Repositories.Implementations
 {
-    internal class AircraftRepository : IAircraftRepository
+    public class AircraftRepository : IAircraftRepository
     {
-        StartUp db = new StartUp();
+        public string connectionStrings = "server = localhost; user = root; database = AircraftMgt; password = Adewale24434$";
+        public MySqlConnection Connection() => new MySqlConnection(connectionStrings);
+
+
         public Aircraft Create(Aircraft aircraft)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
-                var querry = $"Insert into aircraft (Id, Name, EngineNumber, Capacity, DateCreated) values('{aircraft.Id}', '{aircraft.Name}', '{aircraft.EngineNumber}', '{aircraft.Capacity}','{aircraft.DateCreated}');";
+                var dateCreated = aircraft.DateCreated.ToString("yyyy-MM-dd HH:mm:ss");
+                var querry = $"Insert into aircraft (Id, Name, EngineNumber, Capacity, DateCreated) values('{aircraft.Id}', '{aircraft.Name}', '{aircraft.EngineNumber}', '{aircraft.Capacity}', '{dateCreated}');";
                 var command = new MySqlCommand(querry, connect);
                 var row = command.ExecuteNonQuery();
                 if (row != -1)
@@ -30,7 +34,7 @@ namespace AircraftM.Repositories.Implementations
 
         public bool Delete(string engineNumber)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var querry = $"DELETE FROM aircraft WHERE EngineNumber = @engineNumber;";
@@ -47,15 +51,16 @@ namespace AircraftM.Repositories.Implementations
 
         public Aircraft Get(string engineNumber)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from aircraft where EngineNumber = @engineNumber;", connect);
                 command.Parameters.AddWithValue("@engineNumber", engineNumber);
                 var row = command.ExecuteReader();
-                Aircraft aircraft = new();
+                Aircraft aircraft = null;
                 while (row.Read())
                 {
+                    aircraft = new Aircraft();
                     aircraft.Id = Convert.ToString(row[0]);
                     aircraft.Name = Convert.ToString(row[1]);
                     aircraft.EngineNumber = Convert.ToString(row[2]);
@@ -66,10 +71,13 @@ namespace AircraftM.Repositories.Implementations
             }
         }
 
+
+
+
         public List<Aircraft> GetAll()
         {
             List<Aircraft> aircrafts = new List<Aircraft>();
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"Select * From aircraft;", connect);
@@ -92,15 +100,16 @@ namespace AircraftM.Repositories.Implementations
 
         public Aircraft GetByName(string name)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"select * from aircraft where Name = @name;", connect);
                 command.Parameters.AddWithValue("@name", name);
                 var row = command.ExecuteReader();
-                Aircraft aircraft = new();
+                Aircraft aircraft = null;
                 while (row.Read())
                 {
+                    aircraft = new Aircraft();
                     aircraft.Id = Convert.ToString(row[0]);
                     aircraft.Name = Convert.ToString(row[1]);
                     aircraft.EngineNumber = Convert.ToString(row[2]);

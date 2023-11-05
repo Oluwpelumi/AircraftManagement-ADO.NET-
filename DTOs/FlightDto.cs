@@ -9,7 +9,6 @@ namespace AircraftM.DTOs
     public record FlightDto
     {
         public string Id { get; init; }
-        public string Name { get; init; }
         public string ReferenceNumber { get; init; }
         public string TakeOffPoint { get; init; }
         public string Destination { get; init; }
@@ -23,7 +22,6 @@ namespace AircraftM.DTOs
 
     public record FlightRequestModel
     {
-        public string Name { get; init; }
         public string ReferenceNumber { get; init; }
         public string TakeOffPoint { get; init; }
         public string Destination { get; init; }

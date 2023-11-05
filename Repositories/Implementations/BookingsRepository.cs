@@ -11,10 +11,14 @@ namespace AircraftM.Repositories.Implementations
 {
     public class BookingsRepository : IBookingsRepository
     {
-        StartUp db = new();
+        public string connectionStrings = "server = localhost; user = root; database = AircraftMgt; password = Adewale24434$";
+        public MySqlConnection Connection() => new MySqlConnection(connectionStrings);
+
+
+
         public bool Delete(string id)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var querry = $"DELETE FROM booking WHERE ID = @id;";
@@ -30,23 +34,25 @@ namespace AircraftM.Repositories.Implementations
         }
 
 
-        public Bookings Get(string id)
+        public Bookings Get(string referenceNumber)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
-                var command = new MySqlCommand($"select * from booking where Id = @id;", connect);
-                command.Parameters.AddWithValue("@id", id);
+                var command = new MySqlCommand($"select * from booking where ReferenceNumber = @referenceNumber;", connect);
+                command.Parameters.AddWithValue("@referenceNumber", referenceNumber);
                 var row = command.ExecuteReader();
-                Bookings bk = new();
+                Bookings bk = null;
                 while (row.Read())
                 {
+                    bk = new Bookings();
                     bk.Id = Convert.ToString(row[0]);
                     bk.ReferenceNumber = Convert.ToString(row[1]);
                     bk.SeatNumber = Convert.ToInt32(row[2]);
                     bk.PassengerEmail = Convert.ToString(row[3]);
-                    bk.FlightId = Convert.ToString(row[4]);
-                    bk.DateCreated = Convert.ToDateTime(row[5]);
+                    bk.FlightReferenceNumber = Convert.ToString(row[4]);
+                    bk.AircraftName = Convert.ToString(row[5]);
+                    bk.DateCreated = Convert.ToDateTime(row[6]);
                 }
                 return bk;
             }
@@ -55,7 +61,7 @@ namespace AircraftM.Repositories.Implementations
         public List<Bookings> GetAll()
         {
             List<Bookings> bookings = new List<Bookings>();
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
                 var command = new MySqlCommand($"Select * From booking;", connect);
@@ -67,8 +73,9 @@ namespace AircraftM.Repositories.Implementations
                     bk.ReferenceNumber = Convert.ToString(row[1]);
                     bk.SeatNumber = Convert.ToInt32(row[2]);
                     bk.PassengerEmail = Convert.ToString(row[3]);
-                    bk.FlightId = Convert.ToString(row[4]);
-                    bk.DateCreated = Convert.ToDateTime(row[5]);
+                    bk.FlightReferenceNumber = Convert.ToString(row[4]);
+                    bk.AircraftName = Convert.ToString(row[5]);
+                    bk.DateCreated = Convert.ToDateTime(row[6]);
 
                     bookings.Add(bk);
                 }
@@ -79,10 +86,11 @@ namespace AircraftM.Repositories.Implementations
 
         public Bookings Make(Bookings bk)
         {
-            using (var connect = db.Connection())
+            using (var connect = Connection())
             {
                 connect.Open();
-                var querry = $"Insert into booking (Id, ReferenceNumber, SeatNumber, PassengerEmail, FlightId, DateCreated) values('{bk.Id}', '{bk.ReferenceNumber}', '{bk.SeatNumber}', '{bk.PassengerEmail}',  '{bk.FlightId}','{bk.DateCreated}');";
+                var dateCreated = bk.DateCreated.ToString("yyyy-MM-dd HH:mm:ss");
+                var querry = $"Insert into booking (Id, ReferenceNumber, SeatNumber, PassengerEmail, FlightReferenceNumber, AircraftName, DateCreated) values('{bk.Id}', '{bk.ReferenceNumber}', '{bk.SeatNumber}', '{bk.PassengerEmail}',  '{bk.FlightReferenceNumber}', '{bk.AircraftName}','{dateCreated}');";
                 var command = new MySqlCommand(querry, connect);
                 var row = command.ExecuteNonQuery();
                 if (row != -1)
@@ -94,3 +102,4 @@ namespace AircraftM.Repositories.Implementations
         }
     }
 }
+ 

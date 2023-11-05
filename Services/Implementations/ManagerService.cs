@@ -25,11 +25,15 @@ namespace AircraftM.Services.Implementations
             var manager = _managerRepository.Get(staffNumber);
             if (manager != null)
             {
+                var user = _userRepository.GetById(manager.UserId);
                 _managerRepository.Delete(staffNumber);
+                _userRepository.Delete(user.UserEmail);
+                _profileRepository.Delete(user.UserEmail);
+                _addressRepository.Delete(user.AddressId);
                 return new ManagerResponse<bool>
                 {
                     Data = true,
-                    Message = "Successful",
+                    Message = $"The manager with the staff-Number {manager.StaffNumber} has been deleted Successfully",
                     Status = true
                 };
             }
@@ -174,7 +178,7 @@ namespace AircraftM.Services.Implementations
                 Password = model.Password,
                 AddressId = address.Id,
                 ProfileId = profile.Id,
-                RoleId = _roleRepository.Get("MANAGER").Id
+                RoleId = _roleRepository.Get("manager").Id
             };
             Manager manager = new Manager
             {

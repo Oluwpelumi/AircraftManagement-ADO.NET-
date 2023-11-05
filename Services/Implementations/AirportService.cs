@@ -24,7 +24,7 @@ namespace AircraftM.Services.Implementations
                 return new AirportResponse<bool>
                 {
                     Data = true,
-                    Message = "Successful",
+                    Message = $"The airport {airport.Name} has been deleted Successfully",
                     Status = true
                 };
             }
@@ -112,7 +112,7 @@ namespace AircraftM.Services.Implementations
             return new AirportResponse<AirportDto>
             {
                 Status = true,
-                Message = "airport Registered successfully",
+                Message = $"airport{airport.Name} Registered successfully",
                 Data = new AirportDto
                 {
                     Id = airport.Id,

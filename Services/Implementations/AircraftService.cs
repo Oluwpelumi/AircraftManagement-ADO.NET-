@@ -23,7 +23,7 @@ namespace AircraftM.Services.Implementations
                 return new AircraftResponse<bool>
                 {
                     Data = true,
-                    Message = "Successful",
+                    Message = $"Aircraft with the engine-Number{aircraft.EngineNumber} has been deleted Successfully",
                     Status = true
                 };
             }
@@ -39,6 +39,33 @@ namespace AircraftM.Services.Implementations
         public AircraftResponse<AircraftDto> GetAircraft(string engineNumber)
         {
             var aircraft = _aircraftRepository.Get(engineNumber);
+            if (aircraft != null)
+            {
+                return new AircraftResponse<AircraftDto>
+                {
+                    Data = new AircraftDto
+                    {
+                        Id = aircraft.Id,
+                        Capacity = aircraft.Capacity,
+                        EngineNumber = aircraft.EngineNumber,
+                        Name = aircraft.Name,
+                        DateCreated = aircraft.DateCreated
+                    },
+                    Message = "Successful",
+                    Status = true
+                };
+            }
+            return new AircraftResponse<AircraftDto>
+            {
+                Data = null,
+                Message = "aircraft not found",
+                Status = false
+            };
+        }
+
+        public AircraftResponse<AircraftDto> GetAircraftByName(string name)
+        {
+            var aircraft = _aircraftRepository.GetByName(name);
             if (aircraft != null)
             {
                 return new AircraftResponse<AircraftDto>
